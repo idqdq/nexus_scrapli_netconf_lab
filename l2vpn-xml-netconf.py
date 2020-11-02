@@ -9,21 +9,16 @@ def create_evpn_via_scrapi_netconf(evpn_data, datastore='running'):
         "host": "192.168.99.91",
         "auth_username": "apiuser",
         "auth_password": "apipassword",
-        "auth_strict_key": False,
-        #"transport": "ssh2",
+        "auth_strict_key": False,        
     }
 
-    conn = NetconfScrape(**my_device)
-    conn.open()
-    
-    response = conn.edit_config(config=evpn_data, target=datastore)
-    
-    conn.close()
-    return response
+    with NetconfScrape(**my_device) as conn:
+        response = conn.edit_config(config=evpn_data, target=datastore)
+        return response
 
 
-evpn10 = evpn_data(111, 10111, '10.1.1.1/24', mtu=9000)
-evpn20 = evpn_data(222, 10222, '10.2.2.2/24', description='2nd anycast SVI (by netconf)', supARP=True)
+evpn10 = evpn_data(333, 10333, '10.3.3.3/24', mtu=9000, mgroup='230.1.1.3')
+evpn20 = evpn_data(444, 10444, '10.4.4.4/24', mgroup='230.1.1.4', description='2nd anycast SVI (by netconf)', supARP=True)
 
 resp1 = create_evpn_via_scrapi_netconf(evpn10.get_rpc())
 resp2 = create_evpn_via_scrapi_netconf(evpn20.get_rpc())
