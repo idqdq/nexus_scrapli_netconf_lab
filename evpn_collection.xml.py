@@ -1,3 +1,5 @@
+# carefully gathered netconf snippets related to evpn configs for cisco nexus
+#
 # Netconf XML RPC for creating vlan + vni
 #
 # vlan 126
