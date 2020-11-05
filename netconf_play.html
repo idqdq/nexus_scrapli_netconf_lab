@@ -14254,10 +14254,13 @@ a.anchor-link {
 <div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[6]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[65]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">xpath2xml</span><span class="p">(</span><span class="n">xpath</span><span class="p">,</span> <span class="n">xmlns</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">operation</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">xml.dom.minidom</span>
+
+<span class="k">def</span> <span class="nf">xpath2xml</span><span class="p">(</span><span class="n">xpath</span><span class="p">,</span> <span class="n">xmlns</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">operation</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="c1">#transforms xpath like string e.g. &quot;/System/eps-items/epId-items/Ep-list/epId=1/nws-items/vni-items/Nw-list[]/vni=10444&quot;</span>
     <span class="c1">#to xml-like sequence of elements tags: </span>
     <span class="c1"># &lt;System xmlns=&quot;http://cisco.com/ns/yang/cisco-nx-os-device&quot;&gt;</span>
@@ -14279,7 +14282,15 @@ a.anchor-link {
     <span class="c1">#</span>
     <span class="c1"># it has optional parameter &#39;operation&#39; that adds the string &#39;operation=&quot;value&quot;&#39; to the element marked with square brackets &#39;[]&#39;</span>
     <span class="c1"># for an nxos the value of the operation can be either &quot;remove&quot; or &quot;replace&quot;</span>
+    <span class="c1">#</span>
+    <span class="c1"># there is a problem with parsing elements that contain the &#39;/&#39; separator within like this tDn element has:</span>
+    <span class="c1"># /System/intf-items/svi-items/If-list/rtvrfMbr-items/tDn=/System/inst-items/Inst-list[name=&#39;{vrf_name}&#39;]</span>
+    <span class="c1"># the same case if you want to configure a physical interface like Eth103/1/20</span>
+    <span class="c1"># </span>
+    <span class="c1"># as a workaround I mark all the slashes with additional one, then replace that doubleslashes with # sign</span>
+    <span class="c1"># then split xpath and unmark them back</span>
 
+    <span class="n">xpath</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;//&#39;</span><span class="p">,</span> <span class="s1">&#39;#&#39;</span><span class="p">,</span> <span class="n">xpath</span><span class="p">)</span> <span class="c1"># &lt;-- replace doubleslashes with &#39;#&#39;</span>
     <span class="n">pl</span> <span class="o">=</span> <span class="n">xpath</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
     
     <span class="n">xmls</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;&lt;</span><span class="si">{</span><span class="n">pl</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1"> xmlns=&quot;</span><span class="si">{</span><span class="n">xmlns</span><span class="si">}</span><span class="s1">&quot;&gt;&#39;</span> <span class="k">if</span> <span class="n">xmlns</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">&#39;&lt;</span><span class="si">{</span><span class="n">pl</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">&gt;&#39;</span>
@@ -14294,7 +14305,8 @@ a.anchor-link {
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pl</span><span class="p">)):</span>
             <span class="n">elem</span> <span class="o">=</span> <span class="n">pl</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
             <span class="k">if</span> <span class="s2">&quot;=&quot;</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">:</span>
-                <span class="n">elem</span><span class="p">,</span><span class="n">key</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)</span>
+                <span class="n">elem</span><span class="p">,</span><span class="n">key</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;#&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="c1"># &lt;-- replace &#39;#&#39;</span>
                 <span class="n">xmls</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;&lt;</span><span class="si">{</span><span class="n">elem</span><span class="si">}</span><span class="s1">&gt;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&lt;/</span><span class="si">{</span><span class="n">elem</span><span class="si">}</span><span class="s1">&gt;&#39;</span>
                 <span class="k">break</span>
             <span class="k">if</span> <span class="s2">&quot;[]&quot;</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">:</span>
@@ -14313,8 +14325,11 @@ a.anchor-link {
             <span class="k">return</span> <span class="n">xmls</span> <span class="o">+</span> <span class="n">_xpath2xml</span><span class="p">(</span><span class="n">pl</span><span class="p">[(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)::])</span> <span class="o">+</span> <span class="n">xmle</span> <span class="c1">#recursion</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">xmls</span> <span class="o">+</span> <span class="n">xmle</span>
-     
+         
     <span class="k">return</span> <span class="n">xmls</span> <span class="o">+</span> <span class="n">_xpath2xml</span><span class="p">(</span><span class="n">pl</span><span class="p">[</span><span class="mi">2</span><span class="p">::])</span> <span class="o">+</span> <span class="n">xmle</span>
+
+<span class="k">def</span> <span class="nf">ppxml</span><span class="p">(</span><span class="n">xmlstr</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">xml</span><span class="o">.</span><span class="n">dom</span><span class="o">.</span><span class="n">minidom</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span><span class="n">xmlstr</span><span class="p">)</span><span class="o">.</span><span class="n">toprettyxml</span><span class="p">(</span><span class="n">indent</span><span class="o">=</span><span class="s2">&quot;    &quot;</span><span class="p">))</span>
 </pre></div>
 
      </div>
@@ -14325,7 +14340,7 @@ a.anchor-link {
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[7]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[66]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">scrapli_netconf.driver</span> <span class="kn">import</span> <span class="n">NetconfScrape</span>
@@ -14349,12 +14364,12 @@ a.anchor-link {
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[8]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[67]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># get all evpn related configs by netconf</span>
-<span class="n">vlan_id</span> <span class="o">=</span> <span class="mi">111</span>
-<span class="n">vxlan_id</span> <span class="o">=</span> <span class="mi">10111</span>
+<span class="n">vlan_id</span> <span class="o">=</span> <span class="mi">333</span>
+<span class="n">vxlan_id</span> <span class="o">=</span> <span class="mi">10333</span>
 
 <span class="n">xpath_nve</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;/System/eps-items/epId-items/Ep-list/epId=1/nws-items/vni-items/Nw-list[]/vni=</span><span class="si">{</span><span class="n">vxlan_id</span><span class="si">}</span><span class="s2">&quot;</span>
 <span class="n">xpath_svi</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;/System/intf-items/svi-items/If-list[]/id=vlan</span><span class="si">{</span><span class="n">vlan_id</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -14403,12 +14418,10 @@ a.anchor-link {
             &lt;nws-items&gt;
               &lt;vni-items&gt;
                 &lt;Nw-list&gt;
-                  &lt;vni&gt;10111&lt;/vni&gt;
-                  &lt;IngRepl-items&gt;
-                    &lt;proto&gt;bgp&lt;/proto&gt;
-                  &lt;/IngRepl-items&gt;
+                  &lt;vni&gt;10333&lt;/vni&gt;
                   &lt;associateVrfFlag&gt;false&lt;/associateVrfFlag&gt;
                   &lt;isLegacyMode&gt;false&lt;/isLegacyMode&gt;
+                  &lt;mcastGroup&gt;230.1.1.3&lt;/mcastGroup&gt;
                   &lt;multisiteIngRepl&gt;disable&lt;/multisiteIngRepl&gt;
                   &lt;spineAnyCastGw&gt;false&lt;/spineAnyCastGw&gt;
                   &lt;suppressARP&gt;off&lt;/suppressARP&gt;
@@ -14428,7 +14441,7 @@ a.anchor-link {
       &lt;intf-items&gt;
         &lt;svi-items&gt;
           &lt;If-list&gt;
-            &lt;id&gt;vlan111&lt;/id&gt;
+            &lt;id&gt;vlan333&lt;/id&gt;
             &lt;adminSt&gt;up&lt;/adminSt&gt;
             &lt;autostate&gt;true&lt;/autostate&gt;
             &lt;bw&gt;1000000&lt;/bw&gt;
@@ -14451,7 +14464,7 @@ a.anchor-link {
             &lt;snmpTrap&gt;true&lt;/snmpTrap&gt;
             &lt;svi-items&gt;
               &lt;adminSt&gt;up&lt;/adminSt&gt;
-              &lt;ifIndex&gt;151060591&lt;/ifIndex&gt;
+              &lt;ifIndex&gt;151060813&lt;/ifIndex&gt;
               &lt;iod&gt;5&lt;/iod&gt;
               &lt;operAutoState&gt;true&lt;/operAutoState&gt;
               &lt;operBw&gt;1000000&lt;/operBw&gt;
@@ -14459,8 +14472,8 @@ a.anchor-link {
               &lt;operCarrierDelaySec&gt;0&lt;/operCarrierDelaySec&gt;
               &lt;operDelay&gt;1&lt;/operDelay&gt;
               &lt;operDescr&gt;anycast SVI&lt;/operDescr&gt;
-              &lt;operLastChgSec&gt;1604327233&lt;/operLastChgSec&gt;
-              &lt;operLastChgUsec&gt;743528&lt;/operLastChgUsec&gt;
+              &lt;operLastChgSec&gt;1604588456&lt;/operLastChgSec&gt;
+              &lt;operLastChgUsec&gt;907919&lt;/operLastChgUsec&gt;
               &lt;operLoadIntvl1&gt;60&lt;/operLoadIntvl1&gt;
               &lt;operLoadIntvl2&gt;300&lt;/operLoadIntvl2&gt;
               &lt;operLoadIntvl3&gt;60&lt;/operLoadIntvl3&gt;
@@ -14468,7 +14481,7 @@ a.anchor-link {
               &lt;operMtu&gt;9000&lt;/operMtu&gt;
               &lt;operStQual&gt;unknown&lt;/operStQual&gt;
             &lt;/svi-items&gt;
-            &lt;vlanId&gt;111&lt;/vlanId&gt;
+            &lt;vlanId&gt;333&lt;/vlanId&gt;
             &lt;vlanT&gt;bd-regular&lt;/vlanT&gt;
             &lt;vrf-items&gt;
               &lt;name&gt;Tenant-1&lt;/name&gt;
@@ -14486,30 +14499,18 @@ a.anchor-link {
       &lt;bd-items&gt;
         &lt;bd-items&gt;
           &lt;BD-list&gt;
-            &lt;fabEncap&gt;vlan-111&lt;/fabEncap&gt;
+            &lt;fabEncap&gt;vlan-333&lt;/fabEncap&gt;
             &lt;BdState&gt;active&lt;/BdState&gt;
-            &lt;accEncap&gt;vxlan-10111&lt;/accEncap&gt;
+            &lt;accEncap&gt;vxlan-10333&lt;/accEncap&gt;
             &lt;adminSt&gt;active&lt;/adminSt&gt;
             &lt;bridgeMode&gt;mac&lt;/bridgeMode&gt;
-            &lt;dbgVlanStats-items&gt;
-              &lt;inBcastOctets&gt;0&lt;/inBcastOctets&gt;
-              &lt;inBcastPkts&gt;0&lt;/inBcastPkts&gt;
-              &lt;inL3UcastOctets&gt;0&lt;/inL3UcastOctets&gt;
-              &lt;inL3UcastPkts&gt;0&lt;/inL3UcastPkts&gt;
-              &lt;inMcastOctets&gt;0&lt;/inMcastOctets&gt;
-              &lt;inMcastPkts&gt;0&lt;/inMcastPkts&gt;
-              &lt;inUcastOctets&gt;0&lt;/inUcastOctets&gt;
-              &lt;inUcastPkts&gt;0&lt;/inUcastPkts&gt;
-              &lt;outUcastOctets&gt;0&lt;/outUcastOctets&gt;
-              &lt;outUcastPkts&gt;0&lt;/outUcastPkts&gt;
-            &lt;/dbgVlanStats-items&gt;
             &lt;fwdCtrl&gt;mdst-flood&lt;/fwdCtrl&gt;
             &lt;fwdMode&gt;bridge,route&lt;/fwdMode&gt;
-            &lt;id&gt;111&lt;/id&gt;
+            &lt;id&gt;333&lt;/id&gt;
             &lt;longName&gt;false&lt;/longName&gt;
             &lt;macPacketClassify&gt;disable&lt;/macPacketClassify&gt;
             &lt;mode&gt;CE&lt;/mode&gt;
-            &lt;name&gt;l2VNI-10111&lt;/name&gt;
+            &lt;name&gt;l2VNI-10333&lt;/name&gt;
             &lt;operSt&gt;down&lt;/operSt&gt;
             &lt;xConnect&gt;disable&lt;/xConnect&gt;
           &lt;/BD-list&gt;
@@ -14525,8 +14526,8 @@ a.anchor-link {
       &lt;evpn-items&gt;
         &lt;bdevi-items&gt;
           &lt;BDEvi-list&gt;
-            &lt;encap&gt;vxlan-10111&lt;/encap&gt;
-            &lt;operRd&gt;rd:ipv4-nn2:1.1.1.1:32878&lt;/operRd&gt;
+            &lt;encap&gt;vxlan-10333&lt;/encap&gt;
+            &lt;operRd&gt;rd:ipv4-nn2:1.1.1.1:33100&lt;/operRd&gt;
             &lt;rd&gt;rd:unknown:0:0&lt;/rd&gt;
             &lt;rttp-items&gt;
               &lt;RttP-list&gt;
@@ -14536,7 +14537,6 @@ a.anchor-link {
                     &lt;rtt&gt;route-target:unknown:0:0&lt;/rtt&gt;
                   &lt;/RttEntry-list&gt;
                 &lt;/ent-items&gt;
-                &lt;operRttAuto&gt;route-target:as2-nn2:65000:10111&lt;/operRttAuto&gt;
               &lt;/RttP-list&gt;
               &lt;RttP-list&gt;
                 &lt;type&gt;export&lt;/type&gt;
@@ -14545,7 +14545,6 @@ a.anchor-link {
                     &lt;rtt&gt;route-target:unknown:0:0&lt;/rtt&gt;
                   &lt;/RttEntry-list&gt;
                 &lt;/ent-items&gt;
-                &lt;operRttAuto&gt;route-target:as2-nn2:65000:10111&lt;/operRttAuto&gt;
               &lt;/RttP-list&gt;
             &lt;/rttp-items&gt;
             &lt;tblMapFltr&gt;false&lt;/tblMapFltr&gt;
@@ -14567,12 +14566,12 @@ a.anchor-link {
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[9]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[68]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># delete evpn</span>
-<span class="n">vlan_id</span> <span class="o">=</span> <span class="mi">111</span>
-<span class="n">vxlan_id</span> <span class="o">=</span> <span class="mi">10111</span>
+<span class="n">vlan_id</span> <span class="o">=</span> <span class="mi">333</span>
+<span class="n">vxlan_id</span> <span class="o">=</span> <span class="mi">10333</span>
 
 <span class="n">del_evpn_conf</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;&lt;config&gt;&lt;System xmlns=&quot;http://cisco.com/ns/yang/cisco-nx-os-device&quot;&gt;&#39;</span> <span class="o">+</span> 
         <span class="n">xpath2xml</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/eps-items/epId-items/Ep-list/epId=1/nws-items/vni-items/Nw-list[]/vni=</span><span class="si">{</span><span class="n">vxlan_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">operation</span><span class="o">=</span><span class="s2">&quot;remove&quot;</span><span class="p">)</span> <span class="o">+</span> 
@@ -14581,9 +14580,8 @@ a.anchor-link {
         <span class="n">xpath2xml</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/evpn-items/bdevi-items/BDEvi-list[]/encap=vxlan-</span><span class="si">{</span><span class="n">vxlan_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">operation</span><span class="o">=</span><span class="s2">&quot;remove&quot;</span><span class="p">)</span> <span class="o">+</span> 
 <span class="s2">&quot;&lt;/System&gt;&lt;/config&gt;&quot;</span><span class="p">)</span>
 
-<span class="c1">#print(del_evpn_conf)</span>
-<span class="kn">import</span> <span class="nn">xml.dom.minidom</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">xml</span><span class="o">.</span><span class="n">dom</span><span class="o">.</span><span class="n">minidom</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span><span class="n">del_evpn_conf</span><span class="p">)</span><span class="o">.</span><span class="n">toprettyxml</span><span class="p">(</span><span class="n">indent</span> <span class="o">=</span> <span class="s2">&quot;   &quot;</span><span class="p">))</span>
+
+<span class="n">ppxml</span><span class="p">(</span><span class="n">del_evpn_conf</span><span class="p">)</span>
 </pre></div>
 
      </div>
@@ -14605,43 +14603,43 @@ a.anchor-link {
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
 <pre>&lt;?xml version=&#34;1.0&#34; ?&gt;
 &lt;config&gt;
-   &lt;System xmlns=&#34;http://cisco.com/ns/yang/cisco-nx-os-device&#34;&gt;
-      &lt;eps-items&gt;
-         &lt;epId-items&gt;
-            &lt;Ep-list&gt;
-               &lt;epId&gt;1&lt;/epId&gt;
-               &lt;nws-items&gt;
-                  &lt;vni-items&gt;
-                     &lt;Nw-list operation=&#34;remove&#34;&gt;
-                        &lt;vni&gt;10111&lt;/vni&gt;
-                     &lt;/Nw-list&gt;
-                  &lt;/vni-items&gt;
-               &lt;/nws-items&gt;
-            &lt;/Ep-list&gt;
-         &lt;/epId-items&gt;
-      &lt;/eps-items&gt;
-      &lt;intf-items&gt;
-         &lt;svi-items&gt;
-            &lt;If-list operation=&#34;remove&#34;&gt;
-               &lt;id&gt;vlan111&lt;/id&gt;
-            &lt;/If-list&gt;
-         &lt;/svi-items&gt;
-      &lt;/intf-items&gt;
-      &lt;bd-items&gt;
-         &lt;bd-items&gt;
-            &lt;BD-list operation=&#34;remove&#34;&gt;
-               &lt;fabEncap&gt;vlan-111&lt;/fabEncap&gt;
-            &lt;/BD-list&gt;
-         &lt;/bd-items&gt;
-      &lt;/bd-items&gt;
-      &lt;evpn-items&gt;
-         &lt;bdevi-items&gt;
-            &lt;BDEvi-list operation=&#34;remove&#34;&gt;
-               &lt;encap&gt;vxlan-10111&lt;/encap&gt;
-            &lt;/BDEvi-list&gt;
-         &lt;/bdevi-items&gt;
-      &lt;/evpn-items&gt;
-   &lt;/System&gt;
+    &lt;System xmlns=&#34;http://cisco.com/ns/yang/cisco-nx-os-device&#34;&gt;
+        &lt;eps-items&gt;
+            &lt;epId-items&gt;
+                &lt;Ep-list&gt;
+                    &lt;epId&gt;1&lt;/epId&gt;
+                    &lt;nws-items&gt;
+                        &lt;vni-items&gt;
+                            &lt;Nw-list operation=&#34;remove&#34;&gt;
+                                &lt;vni&gt;10333&lt;/vni&gt;
+                            &lt;/Nw-list&gt;
+                        &lt;/vni-items&gt;
+                    &lt;/nws-items&gt;
+                &lt;/Ep-list&gt;
+            &lt;/epId-items&gt;
+        &lt;/eps-items&gt;
+        &lt;intf-items&gt;
+            &lt;svi-items&gt;
+                &lt;If-list operation=&#34;remove&#34;&gt;
+                    &lt;id&gt;vlan333&lt;/id&gt;
+                &lt;/If-list&gt;
+            &lt;/svi-items&gt;
+        &lt;/intf-items&gt;
+        &lt;bd-items&gt;
+            &lt;bd-items&gt;
+                &lt;BD-list operation=&#34;remove&#34;&gt;
+                    &lt;fabEncap&gt;vlan-333&lt;/fabEncap&gt;
+                &lt;/BD-list&gt;
+            &lt;/bd-items&gt;
+        &lt;/bd-items&gt;
+        &lt;evpn-items&gt;
+            &lt;bdevi-items&gt;
+                &lt;BDEvi-list operation=&#34;remove&#34;&gt;
+                    &lt;encap&gt;vxlan-10333&lt;/encap&gt;
+                &lt;/BDEvi-list&gt;
+            &lt;/bdevi-items&gt;
+        &lt;/evpn-items&gt;
+    &lt;/System&gt;
 &lt;/config&gt;
 
 </pre>
@@ -14655,7 +14653,7 @@ a.anchor-link {
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[10]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[69]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">response</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">edit_config</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">del_evpn_conf</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="s2">&quot;running&quot;</span><span class="p">)</span>
@@ -14694,7 +14692,7 @@ a.anchor-link {
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[11]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[70]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -14703,6 +14701,60 @@ a.anchor-link {
      </div>
 </div>
 </div>
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[71]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">xmlns</span> <span class="o">=</span> <span class="s2">&quot;http://cisco.com/ns/yang/cisco-nx-os-device&quot;</span>
+<span class="n">xpath</span> <span class="o">=</span> <span class="s2">&quot;/System/intf-items/svi-items/If-list[]/id=vlan111/mtu=9000/descr=blablabla/adminSt=up/rtvrfMbr-items/tDn=//System//inst-items//Inst-list[name=&#39;Tenant-1&#39;]&quot;</span>
+
+<span class="n">ppxml</span><span class="p">(</span><span class="n">xpath2xml</span><span class="p">(</span><span class="n">xpath</span><span class="p">,</span> <span class="n">xmlns</span><span class="o">=</span><span class="n">xmlns</span><span class="p">,</span> <span class="n">operation</span><span class="o">=</span><span class="s2">&quot;replace&quot;</span><span class="p">))</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>&lt;?xml version=&#34;1.0&#34; ?&gt;
+&lt;System xmlns=&#34;http://cisco.com/ns/yang/cisco-nx-os-device&#34;&gt;
+    &lt;intf-items&gt;
+        &lt;svi-items&gt;
+            &lt;If-list operation=&#34;replace&#34;&gt;
+                &lt;id&gt;vlan111&lt;/id&gt;
+                &lt;mtu&gt;9000&lt;/mtu&gt;
+                &lt;descr&gt;blablabla&lt;/descr&gt;
+                &lt;adminSt&gt;up&lt;/adminSt&gt;
+                &lt;rtvrfMbr-items&gt;
+                    &lt;tDn&gt;/System/inst-items/Inst-list[name=&#39;Tenant-1&#39;]&lt;/tDn&gt;
+                &lt;/rtvrfMbr-items&gt;
+            &lt;/If-list&gt;
+        &lt;/svi-items&gt;
+    &lt;/intf-items&gt;
+&lt;/System&gt;
+
+</pre>
+</div>
+</div>
+
+</div>
+
 </div>
 
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
