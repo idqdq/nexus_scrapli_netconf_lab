@@ -51,3 +51,63 @@ class evpn_data:
                 (tpl_nve_mcast_repl.format(vni=self.vni, mgroup=self.mgroup, supARP=self.supARP) if self.mgroup else tpl_nve_ingress_repl_bgp.format(vni=self.vni, supARP=self.supARP)) + 
                 tpl_bgp_evpn.format(vni=self.vni) + 
                 tpl_tail)
+
+
+def xpath2xml(xpath, xmlns='', operation=None):
+    #transforms xpath like string e.g. "/System/eps-items/epId-items/Ep-list/epId=1/nws-items/vni-items/Nw-list[]/vni=10444"
+    #to xml-like sequence of elements tags: 
+    # <System xmlns="http://cisco.com/ns/yang/cisco-nx-os-device">
+    #   <eps-items>
+    #       <epId-items>
+    #           <Ep-list>
+    #               <epId>1</epId>
+    #               <nws-items>
+    #                   <vni-items>
+    #                       <Nw-list operation="remove">
+    #                           <vni>10444</vni>
+    #                       </Nw-list>
+    #                   </vni-items>
+    #               </nws-items>
+    #           </Ep-list>
+    #       </epId-items>
+    #   </eps-items>
+    # </System>
+    #
+    # it has optional parameter 'operation' that adds the string 'operation="value"' to the element marked with square brackets '[]'
+    # for an nxos the value of the operation can be either "remove" or "replace"
+
+    pl = xpath.split('/')
+    
+    xmls = f'<{pl[1]} xmlns="{xmlns}">' if xmlns else f'<{pl[1]}>'
+    xmle = f'</{pl[1]}>'
+     
+    def _xpath2xml(pl):
+        key = ''
+        xmls = ''
+        xmle = ''
+        operation_set = ("remove", "replace")
+
+        for i in range(len(pl)):
+            elem = pl[i]
+            if "=" in elem:
+                elem,key = elem.split("=")
+                xmls += f'<{elem}>{key}</{elem}>'
+                break
+            if "[]" in elem:
+                elem = elem[:-2]
+                if operation:
+                    if operation not in operation_set:
+                        raise ValueError(f'Incorrect operation value\nmust be one of the following: {", ".join(operation_set)}')
+                    xmls += f'<{elem} operation="{operation}">'                
+                else:
+                    xmls += f'<{elem}>'
+            else:                    
+                xmls += f'<{elem}>'
+            xmle = f'</{elem}>' + xmle
+     
+        if key and i < len(pl)-1:
+            return xmls + _xpath2xml(pl[(i+1)::]) + xmle #recursion
+        else:
+            return xmls + xmle
+     
+    return xmls + _xpath2xml(pl[2::]) + xmle
