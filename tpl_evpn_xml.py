@@ -1,4 +1,4 @@
-###################### xml rpcs to config l2vni (evpn) on a cisco nexus swicthes via netconf ######################
+### netconf xml rpc templates for configuring l2vni (evpn) with anycast SVI on a cisco nexus swicthes via netconf ###
 tpl_head = """
 <config>
     <System xmlns="http://cisco.com/ns/yang/cisco-nx-os-device">"""
@@ -137,36 +137,3 @@ tpl_bgp_evpn = """
             </BDEvi-list>
         </bdevi-items>
     </evpn-items>"""
-#------------------------------------------------------------------------------------------------------------------
-############################### xml rpcs to get data from cisco nexus switches via netconf ########################
-# xpath = "/System/evpn-items/bdevi-items/BDEvi-list/encap=vxlan-10020"
-# xmlns = "http://cisco.com/ns/yang/cisco-nx-os-device"
-# xml = '<System xmlns="http://cisco.com/ns/yang/cisco-nx-os-device"><evpn-items><bdevi-items><BDEvi-list><encap>vxlan-10020</encap></BDEvi-list></bdevi-items></evpn-items></System>'
-def xpath2xml(xpath, xmlns=''):
-    
-    pl = xpath.split('/')
-
-    xmls = f'<{pl[1]} xmlns="{xmlns}">'
-    xmle = f'</{pl[1]}>'
-     
-    def _xpath2xml(pl):
-        key = ''
-        xmls = ''
-        xmle = ''
-
-        for i in range(len(pl)):
-            elem = pl[i]
-            if "=" in elem:
-                elem,key = elem.split("=")
-                xmls += f'<{elem}>{key}</{elem}>'
-                break
-            xmls += f'<{elem}>'
-            xmle = f'</{elem}>' + xmle
-     
-        if key and i < len(pl)-1:
-            return xmls + _xpath2xml(pl[(i+1)::]) + xmle #recursion
-        else:
-            return xmls + xmle
-     
-    return xmls + _xpath2xml(pl[2::]) + xmle
-
