@@ -1,0 +1,10 @@
+---
+n9k1:
+    hostname: 192.168.99.91
+    platform: nxos
+    groups:              
+        - nxos
+    data:
+        site: site1
+        role: host
+        type: switch        

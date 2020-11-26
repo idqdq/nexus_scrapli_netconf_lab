@@ -1,0 +1,14 @@
+---
+vpc1:
+    data:
+        vpc_domain: 101
+
+vpc2:
+    data:
+        vpc_domain: 102
+
+nxos:
+    data:
+        username: apiuser
+        password: apipassword
+    

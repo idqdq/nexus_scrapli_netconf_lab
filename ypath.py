@@ -76,22 +76,22 @@ def wrap_in_tag(tag, xmlns=None):
     
     def decorator(func):        
         @wraps(func)
-        def wrapped(*args, **kwargs):            
-            return xmls + f'{func(*args, **kwargs)}' + xmle
-        
+        def wrapped(*args, **kwargs):       
+            if isinstance(args[0], str): 
+                return xmls + f'{func(*args, **kwargs)}' + xmle
+            if isinstance(args[0], list):
+                return xmls + ''.join([func(ypath, **kwargs) for ypath in args[0]]) + xmle
+            else:
+                raise ValueError('ypath arg should be string or list of strings')
         return wrapped
     return decorator
 
-
-# wrap with System tag
-@wrap_in_tag("System", "http://cisco.com/ns/yang/cisco-nx-os-device")
-def ypath_system(ypath, xmlns='', operation=None):
+@wrap_in_tag("config")
+def ypath_config(ypath, xmlns='', operation=None):
     return ypath2xml(ypath, xmlns, operation)
 
-# wrap with config and System tags
-@wrap_in_tag("config")
 @wrap_in_tag("System", "http://cisco.com/ns/yang/cisco-nx-os-device")
-def ypath_config(ypath, xmlns='', operation=None):
+def ypath_system(ypath, xmlns='', operation=None):
     return ypath2xml(ypath, xmlns, operation)
 
 
