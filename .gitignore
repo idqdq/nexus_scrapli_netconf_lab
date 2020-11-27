@@ -7,6 +7,8 @@ __pycache__/
 venv/
 **/venv/
 
+nornir.log
+
 # ---> Vim
 [._]*.s[a-w][a-z]
 [._]s[a-w][a-z]

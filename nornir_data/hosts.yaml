@@ -1,0 +1,8 @@
+---
+n9n1:
+    hostname: 192.168.99.91    
+    groups:              
+        - nxos
+        - vpc1
+    data:
+        site: site1

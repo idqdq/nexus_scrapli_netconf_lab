@@ -1,0 +1,19 @@
+---
+nxos:
+  platform: nxos  
+  username: apiuser
+  password: apipassword
+  connection_options:
+    scrapli_netconf:
+      port: 830
+      extras:
+        ssh_config_file: True
+        auth_strict_key: False
+
+vpc1:
+  vpc_domain: 101
+
+vpc2:
+  vpc_domain: 102
+
+
