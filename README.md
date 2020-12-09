@@ -67,10 +67,10 @@ example: [play_scraply_netconf.py](play_scraply_netconf.py)
 ### 2.2 nornir_scrapli
 
 Ok lets assume we need to configure not a switch but a service.  
-This means you have to configure a couple of devices at once. Plus you have to implement a transactional model so if one of the devices fails you the changes has to be rolled back.  
+This means you have to configure a couple of devices at once. Plus you have to implement a transactional model so if one of the devices fails all the ongoing changes has to be rolled back.  
 the Nornir library could be pretty usefull. And surprise-surprise there is the scrapli plugin again: [nornir_scrapli](https://github.com/scrapli/nornir_scrapli)
 
-the file [nr_scraply_funcs] (nr_scrapli_funcs.py) contains the function where I tried to implement the transactional model
+the file [nr_scraply_funcs](nr_scrapli_funcs.py) contains the function where I tried to implement the transactional model
 
 and it seems to work:
 
