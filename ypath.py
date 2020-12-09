@@ -32,7 +32,7 @@ def ypath2xml(ypath, xmlns='', operation=None):
     ypath = re.sub(r'//', '#', ypath) # <-- replace doubleslashes with '#'
     pl = ypath.split('/')
     
-    xmls = f'<{pl[1]} xmlns="{xmlns}">' if xmlns else f'<{pl[1]}>'
+    xmls = f'<{pl[1]} xmlns:x="{xmlns}">' if xmlns else f'<{pl[1]}>'
     xmle = f'</{pl[1]}>'
      
     def _ypath2xml(pl):
@@ -99,3 +99,26 @@ def ypath_system(ypath, xmlns='', operation=None):
 import xml.dom.minidom
 def ppxml(xmlstr):    
     print(xml.dom.minidom.parseString(xmlstr).toprettyxml(indent="    "))
+
+
+# helper function to strip ns from xml
+# provided by Jeremy Shulman https://github.com/jeremyschulman/xml-tutorial/blob/master/strip-namespaces.md
+from lxml import etree
+def strip_ns(root: etree.Element) -> etree.Element:
+    """
+    This function removes all namespace information from an XML Element tree
+    so that a Caller can then use the `xpath` function without having
+    to deal with the complexities of namespaces.
+    """
+
+    # first we visit each node in the tree and set the tag name to its localname
+    # value; thus removing its namespace prefix
+
+    for elem in root.getiterator():
+        elem.tag = etree.QName(elem).localname
+
+    # at this point there are no tags with namespaces, so we run the cleanup
+    # process to remove the namespace definitions from within the tree.
+
+    etree.cleanup_namespaces(root)
+    return root
