@@ -17,8 +17,8 @@
               <inBcastPkts>1656</inBcastPkts>
               <inL3UcastOctets>0</inL3UcastOctets>
               <inL3UcastPkts>0</inL3UcastPkts>
-              <inMcastOctets>267432</inMcastOctets>
-              <inMcastPkts>3416</inMcastPkts>
+              <inMcastOctets>282344</inMcastOctets>
+              <inMcastPkts>3649</inMcastPkts>
               <inUcastOctets>35456</inUcastOctets>
               <inUcastPkts>294</inUcastPkts>
               <outUcastOctets>35456</outUcastOctets>
@@ -78,8 +78,8 @@
               <inBcastPkts>0</inBcastPkts>
               <inL3UcastOctets>0</inL3UcastOctets>
               <inL3UcastPkts>0</inL3UcastPkts>
-              <inMcastOctets>55332736</inMcastOctets>
-              <inMcastPkts>432287</inMcastPkts>
+              <inMcastOctets>57569664</inMcastOctets>
+              <inMcastPkts>449763</inMcastPkts>
               <inUcastOctets>0</inUcastOctets>
               <inUcastPkts>0</inUcastPkts>
               <outUcastOctets>0</outUcastOctets>
@@ -232,6 +232,7 @@
             <carDel>100</carDel>
             <ctrlrId/>
             <delay>1</delay>
+            <descr>anycast svi evpn20</descr>
             <inbMgmt>false</inbMgmt>
             <iod>9</iod>
             <loadIntvl1>60</loadIntvl1>
@@ -255,7 +256,7 @@
               <operCarrierDelayMsec>100</operCarrierDelayMsec>
               <operCarrierDelaySec>0</operCarrierDelaySec>
               <operDelay>1</operDelay>
-              <operDescr/>
+              <operDescr>anycast svi evpn20</operDescr>
               <operLastChgSec>1603955119</operLastChgSec>
               <operLastChgUsec>176441</operLastChgUsec>
               <operLoadIntvl1>60</operLoadIntvl1>
@@ -364,6 +365,7 @@
             <carDel>100</carDel>
             <ctrlrId/>
             <delay>1</delay>
+            <descr>Tenant-1 l3vni</descr>
             <inbMgmt>false</inbMgmt>
             <iod>3</iod>
             <loadIntvl1>60</loadIntvl1>
@@ -387,7 +389,7 @@
               <operCarrierDelayMsec>100</operCarrierDelayMsec>
               <operCarrierDelaySec>0</operCarrierDelaySec>
               <operDelay>1</operDelay>
-              <operDescr/>
+              <operDescr>Tenant-1 l3vni</operDescr>
               <operLastChgSec>1600929150</operLastChgSec>
               <operLastChgUsec>943752</operLastChgUsec>
               <operLoadIntvl1>60</operLoadIntvl1>
