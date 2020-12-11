@@ -53,6 +53,9 @@ for item in evpn_data:
         item["rtt_import"] = evpn[0].xpath('.//rttp-items/RttP-list[type="import"]/ent-items/RttEntry-list/rtt/text()')
         item["rtt_export"] = evpn[0].xpath('.//rttp-items/RttP-list[type="export"]/ent-items/RttEntry-list/rtt/text()')
         
+
+# adding outer indexes like evpn20 for vlan20 
+evpn_data = [ {f'evpn{item["vlan"]}':item } for item in evpn_data]        
 from pprint import pprint
 pprint(evpn_data)
 
