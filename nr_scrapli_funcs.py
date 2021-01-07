@@ -1,4 +1,3 @@
-import logging
 from nornir import InitNornir
 from nornir.core.task import Task, Result
 from nornir_utils.plugins.functions.print_result import print_result
@@ -25,16 +24,16 @@ init_datastore_rpc = """<copy-config>
   </copy-config>"""
 
 
-def nr_netconf_edit(config, site):
+def nr_netconf_edit(config: str, site: str) -> bool:
     ret = False
     nr = InitNornir(config_file="nornir_data/config.yaml")
     nr = nr.filter(site=site)
 
     host = nr.inventory.hosts
-    print(f"{host=}")
+    print(f"host = {host}")
 
 
-    def deploy_and_verify(task: Task, config: str, target='candidate'):      
+    def deploy_and_verify(task: Task, config: str, target='candidate') -> Result:      
         name = f"initialize a datastore: {target}"        
         task.run(name=name, task=netconf_rpc, 
                 filter_=init_datastore_rpc.format(target=target))
@@ -66,7 +65,7 @@ def nr_netconf_edit(config, site):
     print_result(res_deploy)
 
     if res_deploy.failed:
-        print(res_deploy.failed_hosts)
+        print(f"config deployment (lock/edit/verify) has failed on {res_deploy.failed_hosts}")
         res_discard = nr.run(name="rollback changes on all hosts",                            
                             task=netconf_discard)      
 
@@ -78,7 +77,7 @@ def nr_netconf_edit(config, site):
         print_result(res_commit)
 
         if res_commit.failed:
-            print(f"commit failed on {res_discard.failed_hosts}\ncli monkey needed")
+            print(f"commit failed on {res_commit.failed_hosts}\ncli monkey needed")
         else:
             print("changes were applied successfully!")
             ret = True
@@ -90,3 +89,26 @@ def nr_netconf_edit(config, site):
         print(f"unlock failed on host: {res_unlock.failed_hosts}")
 
     return ret
+
+
+def nr_netconf_get(filter_: str, site: str) -> bool:
+
+    nr = InitNornir(config_file="nornir_data/config.yaml")
+    nr = nr.filter(site=site)
+
+    hosts = nr.inventory.hosts
+    print(f"hosts = {hosts}")
+
+    res_get_config = nr.run(name="get config",                
+                task=netconf_get,
+                filter_=filter_)
+    #print_result(res_get_config)
+
+    from evpn_xml_parse import get_evpn_data_from_xml
+    res = {}
+    for host in hosts:
+        host_result = res_get_config[host][0].result
+        data = get_evpn_data_from_xml(host_result)
+        res[host] = data
+
+    return res

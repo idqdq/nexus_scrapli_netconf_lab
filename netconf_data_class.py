@@ -3,7 +3,15 @@ from ipaddress import IPv4Address, IPv4Interface, IPv4Network
 from tpl_evpn_xml import *
 from ypath import ypath_system, ppxml
 
-# set of evpn/vxlan related ypaths
+# evpn/vxlan related ypaths to retrieve info of all evpns
+ypath_vlan_all = "/bd-items/bd-items/BD-list"
+ypath_svi_all = "/intf-items/svi-items/If-list"
+ypath_ipv4_all = "/ipv4-items/inst-items/dom-items/Dom-list/name={vrf_name}/if-items/If-list"
+ypath_svianycast_all = "/hmm-items/fwdinst-items/if-items/FwdIf-list"
+ypath_nve_all = "/eps-items/epId-items/Ep-list/epId=1/nws-items/vni-items/Nw-list"
+ypath_evpn_all = "/evpn-items/bdevi-items/BDEvi-list"
+
+# set of a certain evpn/vxlan related ypaths to retrieve info of a particular evpn
 ypath_vlan = "/bd-items/bd-items/BD-list[]/fabEncap=vlan-{vlan_id}"
 ypath_svi = "/intf-items/svi-items/If-list[]/id=vlan{vlan_id}"
 ypath_ipv4 = "/ipv4-items/inst-items/dom-items/Dom-list/name={vrf_name}/if-items/If-list[]/id=vlan{vlan_id}"
@@ -11,6 +19,7 @@ ypath_svianycast = "/hmm-items/fwdinst-items/if-items/FwdIf-list[]/id=vlan{vlan_
 ypath_nve = "/eps-items/epId-items/Ep-list/epId=1/nws-items/vni-items/Nw-list[]/vni={vni}"
 ypath_evpn = "/evpn-items/bdevi-items/BDEvi-list[]/encap=vxlan-{vni}"
 
+# set of evpn/vxlan config ypaths
 ypath_vlan_conf = ypath_vlan + "/name={vlan_name}/id={vlan_id}/BdState=active/adminSt=active/bridgeMode=mac/fwdCtrl=mdst-flood/fwdMode=bridge,route/mode=CE"
 ypath_vxlan_conf = ypath_vlan + "/name={vlan_name}/id={vlan_id}/accEncap=vxlan-{vni}/BdState=active/adminSt=active/bridgeMode=mac/fwdCtrl=mdst-flood/fwdMode=bridge,route/mode=CE"
 ypath_svi_conf = ypath_svi + "/mtu={mtu}/descr={description}/adminSt=up/rtvrfMbr-items/tDn=//System//inst-items//Inst-list[name='{vrf_name}']"
@@ -23,6 +32,13 @@ ypath_evpn_conf = ypath_evpn + "/rd=rd:unknown:0:0/rttp-items/RttP-list/type=exp
 # ypath2xml() can't create xml with multiple leafs so we have to add 2nd list separately 
 # note: there is no '[]' hooks in the ypath so that the default operation "merge" will be used
 ypath_evpn_rtimport_conf = "/evpn-items/bdevi-items/BDEvi-list/encap=vxlan-{vni}/rd=rd:unknown:0:0/rttp-items/RttP-list/type=import/ent-items/RttEntry-list/rtt=route-target:unknown:0:0"
+
+
+# get rpc to retrieve all evpn/vxlan related configs from a nexus switch
+def get_all_evpn_config_rpc(vrf="default"): 
+    ypath_list = [ypath_vlan_all, ypath_svi_all, ypath_ipv4_all.format(vrf_name=vrf), ypath_svianycast_all, ypath_nve_all, ypath_evpn_all]
+    rpc = ypath_system(ypath_list)
+    return rpc
 
 
 def check_ip_int(ip_address):
