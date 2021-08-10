@@ -1,0 +1,47 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/12.3X48/junos">
+    <route-information xmlns="http://xml.juniper.net/junos/12.3X48/junos-routing">
+        <!-- keepalive -->
+        <route-table>
+            <table-name>inet.0</table-name>
+            <destination-count>217</destination-count>
+            <total-route-count>359</total-route-count>
+            <active-route-count>169</active-route-count>
+            <holddown-route-count>0</holddown-route-count>
+            <hidden-route-count>48</hidden-route-count>
+            <rt junos:style="brief">
+                <rt-destination>0.0.0.0/0</rt-destination>
+                <rt-entry>
+                    <active-tag>*</active-tag>
+                    <current-active/>
+                    <last-active/>
+                    <protocol-name>Static</protocol-name>
+                    <preference>5</preference>
+                    <age junos:seconds="15218246">25w1d 03:17:26</age>
+                    <nh>
+                        <selected-next-hop/>
+                        <to>217.18.142.189</to>
+                        <via>fe-0/0/2.0</via>
+                    </nh>
+                </rt-entry>
+                <rt-entry>
+                    <active-tag> </active-tag>
+                    <protocol-name>BGP</protocol-name>
+                    <preference>8</preference>
+                    <age junos:seconds="3186571">5w1d 21:09:31</age>
+                    <local-preference>200</local-preference>
+                    <as-path>50928 31133 25159 65000 I
+                    </as-path>
+                    <validation-state>unverified</validation-state>
+                    <nh>
+                        <selected-next-hop/>
+                        <to>172.17.70.26</to>
+                        <via>fe-0/0/0.0</via>
+                    </nh>
+                </rt-entry>
+            </rt>
+        </route-table>
+    </route-information>
+    <cli>
+        <banner></banner>
+    </cli>
+</rpc-reply>

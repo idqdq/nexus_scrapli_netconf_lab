@@ -115,7 +115,8 @@ def strip_ns(root: etree.Element) -> etree.Element:
     # value; thus removing its namespace prefix
 
     for elem in root.getiterator():
-        elem.tag = etree.QName(elem).localname
+        if isinstance(elem.tag, str):
+            elem.tag = etree.QName(elem).localname
 
     # at this point there are no tags with namespaces, so we run the cleanup
     # process to remove the namespace definitions from within the tree.
